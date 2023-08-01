@@ -1,0 +1,52 @@
+Start training the benign model--------------------
+====================Fold 0====================
+Best test epoch: 0, best test acc: 91.50%
+Epoch: 000, Train loss: 0.4084
+Best test epoch: 1, best test acc: 96.00%
+Best test epoch: 2, best test acc: 97.25%
+Best test epoch: 3, best test acc: 99.00%
+Best test epoch: 10, best test acc: 99.50%
+Epoch: 010, Train loss: 0.0692
+Epoch: 020, Train loss: 0.0602
+Epoch: 030, Train loss: 0.0709
+Epoch: 040, Train loss: 0.0557
+Epoch: 050, Train loss: 0.0569
+Epoch: 060, Train loss: 0.0516
+Epoch: 070, Train loss: 0.0542
+Epoch: 080, Train loss: 0.0515
+Epoch: 090, Train loss: 0.0545
+Max epoch=100, Test_acc=99.25%
+Finish training the benign model--------------------
+
+Average clean accuracy: 99.25%
+
+Start analyzing the dataset--------------------
+Finish analyzing the dataset, see results in AIDS_analyze.txt
+
+Select node 11 as the trigger node
+
+Select top-k candidate samples and relabel them--------------------
+The number of samples for poisoning: 44, poison rate: 2.2%
+
+Start training the backdoored model--------------------
+Epoch: 000, Train loss: 0.4455
+Epoch: 010, Train loss: 0.0821
+Epoch: 020, Train loss: 0.0641
+Epoch: 030, Train loss: 0.0578
+Epoch: 040, Train loss: 0.0600
+Epoch: 050, Train loss: 0.0508
+Epoch: 060, Train loss: 0.0551
+Epoch: 070, Train loss: 0.0489
+Epoch: 080, Train loss: 0.0488
+Epoch: 090, Train loss: 0.0653
+Finish training the backdoored model--------------------
+
+Test the backdoored model with unmodified data:
+Normal Acc: 98.98%
+Backdoor ASR: 100.00%
+
+The average occurrence number of the trigger node: 1.37
+Use k=1 and k=2 for testing
+
+Test the backdoored model with modified data--------------------
+With node attributes, the number of total features to be tested: 103
