@@ -1,3 +1,9 @@
+datasets/
+models/
+poisoning_data/
+temp/
+*.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
