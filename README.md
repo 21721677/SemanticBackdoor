@@ -1,4 +1,4 @@
-# SemanticBackdoor-GitHub
+# SemanticBackdoor
 A semantic backdoor attack against Graph Convolutional Networks
 
 # Run the code
