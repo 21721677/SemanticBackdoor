@@ -67,7 +67,7 @@ def backdoor_test(args, T_nodes, trigger_node):
                     for j, feature in enumerate(tqdm(feature_list,
                                                      desc="With node attributes",
                                                      file=sys.stdout)):
-                        test_data_deepcopy = deepcopy(test_data_list)
+                        # test_data_deepcopy = deepcopy(test_data_list)
                         for i, graph in enumerate(test_data_deepcopy):
                             node_num = graph.x.shape[0]
                             # edge_num = graph.edge_index.shape[1]
