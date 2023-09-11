@@ -2,10 +2,10 @@ import argparse
 
 import torch
 
+from BackdoorModified import backdoor_modified
+from BackdoorUnmodified import backdoor_unmodified
 from BenignModel import benign_main
-from BackdoorTesting import backdoor_test
-from DataAnalyzing import analyze_dataset
-from SemanticBackdoor import backdoor_main
+from DataAnalyzing import data_analyzing
 
 
 def parse_args():
@@ -48,9 +48,8 @@ def parse_args():
     parser.add_argument("--log_filename", type=str, default="logs.txt")
     parser.add_argument("--result_filename", type=str, default="results.txt")
 
-    # args = "--dataset AIDS --use_node_attr --n_split 1 --target 0 --p 0.03".split()
-    # args = parser.parse_args(args)
-    args = parser.parse_args()
+    args = "--dataset AIDS --use_node_attr --n_split 1 --target 0 --p 0.03".split()
+    args = parser.parse_args(args)
 
     if args.device == "gpu" and torch.cuda.is_available():
         args.device = torch.device("cuda")
@@ -65,9 +64,9 @@ def parse_args():
 
 def SBAG_main(args):
     benign_main(args)
-    nodes_table, trigger_node = analyze_dataset(args)
-    backdoor_main(args, trigger_node)
-    backdoor_test(args, nodes_table, trigger_node)
+    nodes_table, trigger_node = data_analyzing(args)
+    backdoor_unmodified(args, trigger_node)
+    backdoor_modified(args, nodes_table, trigger_node)
 
 
 if __name__ == "__main__":

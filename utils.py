@@ -1,8 +1,8 @@
 import torch
 import torch.nn.functional as F
 import numpy as np
-from torch_geometric.datasets import TUDataset
 from torch_geometric.nn import GCNConv, global_mean_pool
+from torch_geometric.datasets import TUDataset
 
 
 def load_dataset(args):
