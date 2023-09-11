@@ -2,8 +2,8 @@ import sys
 from collections import defaultdict
 
 import numpy as np
-from tqdm import tqdm
 from torch_geometric.datasets import TUDataset
+from tqdm import tqdm
 
 
 def data_analyzing(args):
