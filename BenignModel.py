@@ -27,7 +27,7 @@ def benign_main(args):
     sss = StratifiedShuffleSplit(
         n_splits=args.n_split, train_size=args.train_size)
 
-    clean_acc = []
+    benign_acc = []
     with open(args.log_filename, "a+") as log,\
             open(args.result_filename, "a+") as result:
 
@@ -76,7 +76,7 @@ def benign_main(args):
                     log.write(output_str+"\n")
 
             test_acc = test_model(benign_model, test_loader, args.device)
-            clean_acc.append(test_acc)
+            benign_acc.append(test_acc)
             output_str = f"Max epoch={args.max_epoch}, test accuracy={test_acc*100:.2f}%"
             print(output_str)
             log.write(output_str+"\n")
@@ -85,8 +85,8 @@ def benign_main(args):
         print(output_str+"\n")
         log.write(output_str+"\n"*2)
 
-        ave_clean_acc = sum(clean_acc)/len(clean_acc)
-        output_str = f"Average clean accuracy: {ave_clean_acc*100:.2f}%"
+        ave_benign_acc = sum(benign_acc)/len(benign_acc)
+        output_str = f"Average clean accuracy: {ave_benign_acc*100:.2f}%"
         print(output_str+"\n")
         log.write(output_str+"\n"*2)
         result.write(output_str+"\n"*2)
