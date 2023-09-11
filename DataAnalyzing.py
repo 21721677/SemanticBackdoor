@@ -6,7 +6,7 @@ from tqdm import tqdm
 from torch_geometric.datasets import TUDataset
 
 
-def analyze_dataset(args):
+def data_analyzing(args):
     dataset_name, target, p = args.dataset, args.target, args.p
     dataset = TUDataset(
         root="temp", name=dataset_name, use_node_attr=False)

@@ -86,7 +86,7 @@ def benign_main(args):
         log.write(output_str+"\n"*2)
 
         ave_benign_acc = sum(benign_acc)/len(benign_acc)
-        output_str = f"Average clean accuracy: {ave_benign_acc*100:.2f}%"
+        output_str = f"Average benign accuracy: {ave_benign_acc*100:.2f}%"
         print(output_str+"\n")
         log.write(output_str+"\n"*2)
         result.write(output_str+"\n"*2)

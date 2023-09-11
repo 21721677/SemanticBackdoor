@@ -90,6 +90,7 @@ def backdoor_modified(args, T_nodes, trigger_node):
                     output_str = f"k={k} average ASR={asr_sum/len(feature_list)*100:.2f}%"
                     print(output_str+"\n")
                     wf.write(output_str+"\n"*2)
+                    log.write(output_str+"\n")
                     result.write(output_str+"\n")
 
                 output_str = f"See details in {args.dataset}_{trigger_node}_attack.txt"
@@ -124,4 +125,5 @@ def backdoor_modified(args, T_nodes, trigger_node):
             output_str = f"k={k} ASR={asr*100:.2f}%"
             print(output_str)
             wf.write(output_str+"\n")
+            log.write(output_str+"\n")
             result.write(output_str+"\n")
