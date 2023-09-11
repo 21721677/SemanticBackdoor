@@ -1,10 +1,12 @@
 import os.path as osp
 import random
+import sys
 from copy import deepcopy
 
 import numpy as np
 import torch
 from torch_geometric.loader import DataLoader
+from tqdm import tqdm
 
 from utils import load_dataset, has_node, test_backdoor
 
@@ -12,7 +14,7 @@ from utils import load_dataset, has_node, test_backdoor
 def backdoor_test(args, T_nodes, trigger_node):
     dataset, num_node_attributes, num_node_labels = load_dataset(args)
 
-    # load the backdoored model
+    # load the backdoor model
     backdoored_model = torch.load(
         osp.join(args.model_dirname, f"{args.dataset}_backdoored_model.pt"))
 
@@ -41,7 +43,7 @@ def backdoor_test(args, T_nodes, trigger_node):
                     if line[num_node_attributes+trigger_node]:
                         feature_list.append(line[:])
 
-        output_str = "Test the backdoored model with modified data--------------------"
+        output_str = "Test the backdoor model with modified data--------------------"
         print(output_str)
         log.write(output_str+"\n")
         result.write("\n"+output_str+"\n")
@@ -62,12 +64,9 @@ def backdoor_test(args, T_nodes, trigger_node):
                     wf.write(output_str+"\n")
 
                     asr_sum = 0
-                    percent = 5
-                    for j, feature in enumerate(feature_list):
-                        if (j+1) % (n//20) == 0:
-                            print(f"{percent}% finished")
-                            percent += 5
-
+                    for j, feature in enumerate(tqdm(feature_list,
+                                                     desc="With node attributes",
+                                                     file=sys.stdout)):
                         test_data_deepcopy = deepcopy(test_data_list)
                         for i, graph in enumerate(test_data_deepcopy):
                             node_num = graph.x.shape[0]
@@ -102,7 +101,9 @@ def backdoor_test(args, T_nodes, trigger_node):
             log.write(output_str+"\n")
             result.write(output_str+"\n")
 
-            for i, graph in enumerate(test_data_list):
+            for i, graph in enumerate(tqdm(test_data_list,
+                                           desc="Without node attributes",
+                                           file=sys.stdout)):
                 node_num = graph.x.shape[0]
                 # edge_num = graph.edge_index.shape[1]
 

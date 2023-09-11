@@ -30,7 +30,7 @@ def backdoor_main(args, trigger_node):
     if not osp.exists(poisoning_data_dir):
         os.mkdir(poisoning_data_dir)
 
-    poisoning_data_list = []  # poisoning samples for training backdoored model
+    poisoning_data_list = []  # poisoning samples for training backdoor model
     benign_data_list = []  # benign samples for benign classification test
     backdoor_data_list = []  # original samples for backdoor classification test
 
@@ -104,7 +104,7 @@ def backdoor_main(args, trigger_node):
             dict(params=backdoored_model.conv_out.parameters(), weight_decay=0)
         ], lr=args.lr)  # Only perform weight-decay on first convolution.
 
-        output_str = "Start training the backdoored model--------------------"
+        output_str = "Start training the backdoor model--------------------"
         print(output_str)
         log.write(output_str+"\n")
 
@@ -116,11 +116,11 @@ def backdoor_main(args, trigger_node):
                 print(output_str)
                 log.write(output_str+"\n")
 
-        output_str = "Finish training the backdoored model--------------------"
+        output_str = "Finish training the backdoor model--------------------"
         print(output_str+"\n")
         log.write(output_str+"\n"*2)
 
-        output_str = "Test the backdoored model with unmodified data:"
+        output_str = "Test the backdoor model with unmodified data:"
         print(output_str)
         log.write(output_str+"\n")
         result.write(output_str+"\n")

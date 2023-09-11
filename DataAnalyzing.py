@@ -1,6 +1,8 @@
+import sys
 from collections import defaultdict
 
 import numpy as np
+from tqdm import tqdm
 from torch_geometric.datasets import TUDataset
 
 
@@ -23,12 +25,7 @@ def analyze_dataset(args):
         nodes_table = defaultdict(
             lambda: {x: 0 for x in range(0, num_classes)})
 
-        percent = 5
-        for i, graph in enumerate(dataset):
-            if (i+1) % (n//20) == 0:
-                print(f"{percent}% finished")
-                percent += 5
-
+        for graph in tqdm(dataset, desc=dataset_name, file=sys.stdout):
             # count the occurrence number of each node
             sum_array = graph.x.sum(axis=0).numpy().astype(int)
             occ_num += sum_array
