@@ -62,7 +62,7 @@ def benign_main(args):
                 test_acc = test_model(benign_model, test_loader, args.device)
                 if test_acc > best_test_acc:
                     best_test_epoch, best_test_acc = epoch, test_acc
-                    output_str = f"Best test epoch: {best_test_epoch}, best test acc: {best_test_acc*100:.2f}%"
+                    output_str = f"Best test epoch: {best_test_epoch}, best test accuracy: {best_test_acc*100:.2f}%"
                     print(output_str)
                     log.write(output_str+"\n")
 
@@ -71,13 +71,13 @@ def benign_main(args):
                         torch.save(benign_model, osp.join(
                             MODEL_DIRNAME, f"{args.dataset}_scoring_model.pt"))
                 if epoch % 10 == 0:
-                    output_str = f"Epoch: {epoch:03d}, Train loss: {train_loss/len(train_data):.4f}"
+                    output_str = f"Epoch: {epoch:03d}, train loss: {train_loss/len(train_data):.4f}"
                     print(output_str)
                     log.write(output_str+"\n")
 
             test_acc = test_model(benign_model, test_loader, args.device)
             clean_acc.append(test_acc)
-            output_str = f"Max epoch={args.max_epoch}, Test_acc={test_acc*100:.2f}%"
+            output_str = f"Max epoch={args.max_epoch}, test accuracy={test_acc*100:.2f}%"
             print(output_str)
             log.write(output_str+"\n")
 
