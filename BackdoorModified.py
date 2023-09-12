@@ -35,21 +35,19 @@ def backdoor_modified(args, T_nodes, trigger_node):
         test_data_list = [graph for graph in dataset if (
             graph.y.item() != args.target and not has_node(graph, num_node_attributes, trigger_node))]
 
-        # record all possible features of the target node
-        feature_list = []
-        if dataset.has_node_attr:
-            for graph in dataset:
-                for line in graph.x:
-                    if line[num_node_attributes+trigger_node]:
-                        feature_list.append(line[:])
-
         output_str = "Test the backdoored model with modified data--------------------"
         print(output_str)
         log.write(output_str+"\n")
         result.write("\n"+output_str+"\n")
 
-        # replace k random node(s) with the target node
         if dataset.has_node_attr:
+            # record all possible features of the target node
+            feature_list = []
+            for graph in dataset:
+                for line in graph.x:
+                    if line[num_node_attributes+trigger_node]:
+                        feature_list.append(line[:])
+
             n = len(feature_list)
 
             output_str = f"With node attributes, the number of total features to be tested: {n}"
@@ -57,15 +55,15 @@ def backdoor_modified(args, T_nodes, trigger_node):
             log.write(output_str+"\n")
             result.write(output_str+"\n")
 
-            with open(f"{args.dataset}_{trigger_node}_attack.txt", "w") as wf:
+            with open(f"{args.dataset}_{trigger_node}_attack.txt", "w") as detail:
+                # replace k random node(s) with the target node
                 for k in [t, t+1]:
                     output_str = f"k={k}"
-                    print(output_str)
-                    wf.write(output_str+"\n")
+                    detail.write(output_str+"\n")
 
                     asr_sum = 0
                     for j, feature in enumerate(tqdm(feature_list,
-                                                     desc="With node attributes",
+                                                     desc=output_str,
                                                      file=sys.stdout)):
                         test_data_deepcopy = deepcopy(test_data_list)
                         for i, graph in enumerate(test_data_deepcopy):
@@ -85,45 +83,47 @@ def backdoor_modified(args, T_nodes, trigger_node):
                             backdoored_model, test_loader, args.target, args.device)
                         asr_sum += asr
 
-                        wf.write(f"feature {j}".ljust(15)+f"ASR={asr:.4f}\n")
+                        detail.write(f"feature {j}".ljust(
+                            15)+f"ASR={asr:.4f}\n")
 
                     output_str = f"k={k} average ASR={asr_sum/len(feature_list)*100:.2f}%"
                     print(output_str+"\n")
-                    wf.write(output_str+"\n"*2)
+                    detail.write(output_str+"\n"*2)
                     log.write(output_str+"\n")
                     result.write(output_str+"\n")
 
                 output_str = f"See details in {args.dataset}_{trigger_node}_attack.txt"
                 print(output_str)
-                wf.write(output_str+"\n")
+                detail.write(output_str+"\n")
         else:
             output_str = "Without node attributes:"
             print(output_str)
             log.write(output_str+"\n")
             result.write(output_str+"\n")
 
-            for i, graph in enumerate(tqdm(test_data_list,
-                                           desc="Without node attributes",
-                                           file=sys.stdout)):
-                node_num = graph.x.shape[0]
-                # edge_num = graph.edge_index.shape[1]
+            # replace k random node(s) with the target node
+            for k in [t, t+1]:
+                for i, graph in enumerate(tqdm(test_data_list,
+                                               desc=f"k={k}",
+                                               file=sys.stdout)):
+                    node_num = graph.x.shape[0]
+                    # edge_num = graph.edge_index.shape[1]
 
-                new_graph = graph
-                new_x = np.zeros(graph.x.shape[1])
-                new_x[trigger_node] = 1
-                node_sample = random.sample(
-                    range(0, node_num), min(node_num, k))
-                for node_idx in node_sample:
-                    new_graph.x[node_idx, :] = torch.from_numpy(new_x)
-                test_data_list[i] = new_graph
+                    new_graph = graph
+                    new_x = np.zeros(graph.x.shape[1])
+                    new_x[trigger_node] = 1
+                    node_sample = random.sample(
+                        range(0, node_num), min(node_num, k))
+                    for node_idx in node_sample:
+                        new_graph.x[node_idx, :] = torch.from_numpy(new_x)
+                    test_data_list[i] = new_graph
 
-            test_loader = DataLoader(
-                test_data_list, batch_size=args.batch_size)
-            asr = test_backdoor(backdoored_model, test_loader,
-                                args.target, args.device)
+                test_loader = DataLoader(
+                    test_data_list, batch_size=args.batch_size)
+                asr = test_backdoor(backdoored_model, test_loader,
+                                    args.target, args.device)
 
-            output_str = f"k={k} ASR={asr*100:.2f}%"
-            print(output_str)
-            wf.write(output_str+"\n")
-            log.write(output_str+"\n")
-            result.write(output_str+"\n")
+                output_str = f"k={k} ASR={asr*100:.2f}%"
+                print(output_str)
+                log.write(output_str+"\n")
+                result.write(output_str+"\n")

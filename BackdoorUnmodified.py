@@ -1,6 +1,6 @@
+from copy import copy, deepcopy
 import os
 import os.path as osp
-from copy import copy, deepcopy
 
 import torch
 from sklearn.model_selection import train_test_split

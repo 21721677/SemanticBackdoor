@@ -22,8 +22,7 @@ def benign_main(args):
         os.mkdir(MODEL_DIRNAME)
 
     # stratified split data in train/test sets
-    labels = [graph.y.item()
-              for graph in dataset] if dataset.num_classes == 2 else None
+    labels = [graph.y.item() for graph in dataset]
     sss = StratifiedShuffleSplit(
         n_splits=args.n_split, train_size=args.train_size)
 
