@@ -1,13 +1,12 @@
-from copy import copy, deepcopy
 import os
 import os.path as osp
+from copy import copy, deepcopy
 
 import torch
 from sklearn.model_selection import train_test_split
 from torch_geometric.loader import DataLoader
 
-from utils import load_dataset, GCN, train_model, test_model, test_backdoor,\
-    has_node, predict_sample, modify_features
+from utils import GCN, has_node, load_dataset, modify_features, predict_sample, test_backdoor, test_model, train_model
 
 
 def backdoor_unmodified(args, trigger_node):

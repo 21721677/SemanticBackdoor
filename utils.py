@@ -1,8 +1,9 @@
+import numpy as np
 import torch
 import torch.nn.functional as F
-import numpy as np
 from torch_geometric.datasets import TUDataset
-from torch_geometric.nn import GCNConv, global_mean_pool
+from torch_geometric.nn.conv import GCNConv
+from torch_geometric.nn.pool import global_mean_pool
 
 
 def load_dataset(args):
@@ -49,7 +50,7 @@ def train_model(model, loader, opt, device):
         out = model(data)
         loss = F.nll_loss(out, data.y)
         loss.backward()
-        loss_all += data.y.size(0)*float(loss)
+        loss_all += data.y.size(0) * float(loss)
         opt.step()
     return loss_all
 
@@ -83,7 +84,7 @@ def test_backdoor(model, loader, target, device):
 # find whether the target node exists
 def has_node(graph, num_attributes, nodeLabel: int):
     sum_array = graph.x.sum(axis=0).numpy().astype(int)
-    return sum_array[num_attributes+nodeLabel] > 0
+    return sum_array[num_attributes + nodeLabel] > 0
 
 
 # the prediction score (pred_score) is equal to the confidence of the sample on its own class
@@ -102,6 +103,6 @@ def modify_features(graph, num_attributes, nodeLabel: int):
     new_graph = graph
     new_feature = np.zeros(n)
     for i, feature in enumerate(new_graph.x):
-        if feature[num_attributes+nodeLabel] == 1:
+        if feature[num_attributes + nodeLabel] == 1:
             new_graph.x[i, :] = torch.from_numpy(new_feature)
     return new_graph

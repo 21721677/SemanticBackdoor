@@ -8,7 +8,7 @@ import torch
 from torch_geometric.loader import DataLoader
 from tqdm import tqdm
 
-from utils import load_dataset, has_node, test_backdoor
+from utils import has_node, load_dataset, test_backdoor
 
 
 def backdoor_modified(args, T_nodes, trigger_node):

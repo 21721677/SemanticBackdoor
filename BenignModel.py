@@ -5,7 +5,7 @@ import torch
 from sklearn.model_selection import StratifiedShuffleSplit
 from torch_geometric.loader import DataLoader
 
-from utils import load_dataset, GCN, train_model, test_model
+from utils import GCN, load_dataset, test_model, train_model
 
 
 def benign_main(args):
