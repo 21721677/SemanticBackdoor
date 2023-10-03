@@ -94,7 +94,8 @@ def backdoor_modified(args, T_nodes, trigger_node):
 
                 output_str = f"See details in output/{args.dataset}_{trigger_node}_attack.txt"
                 print(output_str)
-                detail.write(output_str + "\n")
+                log.write(output_str + "\n")
+                result.write(output_str + "\n")
         else:
             output_str = "Without node attributes:"
             print(output_str)
