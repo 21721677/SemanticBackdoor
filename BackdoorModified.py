@@ -40,7 +40,7 @@ def backdoor_modified(args, T_nodes, trigger_node):
         log.write(output_str + "\n")
         result.write("\n" + output_str + "\n")
 
-        if dataset.has_node_attr:
+        if num_node_attributes:
             # record all possible features of the target node
             feature_list = []
             for graph in dataset:

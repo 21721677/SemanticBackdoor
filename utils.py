@@ -9,9 +9,10 @@ from torch_geometric.nn.pool import global_mean_pool
 def load_dataset(args):
     dataset = TUDataset(
         root="datasets", name=args.dataset, use_node_attr=args.use_node_attr)
-    dataset.has_node_attr = dataset.num_node_attributes > 0
     # node_features =  node_attributes + node_labels
-    return dataset, dataset.num_node_attributes, dataset.num_node_labels
+    if dataset.num_node_features > dataset.num_node_labels:
+        return dataset, dataset.num_node_attributes, dataset.num_node_labels
+    return dataset, 0, dataset.num_node_labels
 
 
 class GCN(torch.nn.Module):
