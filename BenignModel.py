@@ -27,17 +27,17 @@ def benign_main(args):
         n_splits=args.n_split, train_size=args.train_size)
 
     benign_acc = []
-    with open(args.log_filename, "a+") as log,\
-            open(args.result_filename, "a+") as result:
+    with open(osp.join("output", args.log_filename), "a+") as log, \
+            open(osp.join("output", args.result_filename), "a+") as result:
 
         output_str = "Start training the benign model--------------------"
         print(output_str)
-        log.write(output_str+"\n")
+        log.write(output_str + "\n")
 
         for i, (train_index, test_index) in enumerate(sss.split(dataset, labels)):
-            output_str = f"{'='*20}Fold {i}{'='*20}"
+            output_str = f"{'=' * 20}Fold {i}{'=' * 20}"
             print(output_str)
-            log.write(output_str+"\n")
+            log.write(output_str + "\n")
 
             train_data = [dataset[i] for i in train_index]
             test_data = [dataset[i] for i in test_index]
@@ -61,31 +61,31 @@ def benign_main(args):
                 test_acc = test_model(benign_model, test_loader, args.device)
                 if test_acc > best_test_acc:
                     best_test_epoch, best_test_acc = epoch, test_acc
-                    output_str = f"Best test epoch: {best_test_epoch}, best test accuracy: {best_test_acc*100:.2f}%"
+                    output_str = f"Best test epoch: {best_test_epoch}, best test accuracy: {best_test_acc * 100:.2f}%"
                     print(output_str)
-                    log.write(output_str+"\n")
+                    log.write(output_str + "\n")
 
                     # save the scoring model
                     if i == args.k_fold:
                         torch.save(benign_model, osp.join(
                             MODEL_DIRNAME, f"{args.dataset}_scoring_model.pt"))
                 if epoch % 10 == 0:
-                    output_str = f"Epoch: {epoch:03d}, train loss: {train_loss/len(train_data):.4f}"
+                    output_str = f"Epoch: {epoch:03d}, train loss: {train_loss / len(train_data):.4f}"
                     print(output_str)
-                    log.write(output_str+"\n")
+                    log.write(output_str + "\n")
 
             test_acc = test_model(benign_model, test_loader, args.device)
             benign_acc.append(test_acc)
-            output_str = f"Max epoch={args.max_epoch}, test accuracy={test_acc*100:.2f}%"
+            output_str = f"Max epoch={args.max_epoch}, test accuracy={test_acc * 100:.2f}%"
             print(output_str)
-            log.write(output_str+"\n")
+            log.write(output_str + "\n")
 
         output_str = "Finish training the benign model--------------------"
-        print(output_str+"\n")
-        log.write(output_str+"\n"*2)
+        print(output_str + "\n")
+        log.write(output_str + "\n" * 2)
 
-        ave_benign_acc = sum(benign_acc)/len(benign_acc)
-        output_str = f"Average benign accuracy: {ave_benign_acc*100:.2f}%"
-        print(output_str+"\n")
-        log.write(output_str+"\n"*2)
-        result.write(output_str+"\n"*2)
+        ave_benign_acc = sum(benign_acc) / len(benign_acc)
+        output_str = f"Average benign accuracy: {ave_benign_acc * 100:.2f}%"
+        print(output_str + "\n")
+        log.write(output_str + "\n" * 2)
+        result.write(output_str + "\n" * 2)

@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import torch
 
@@ -48,14 +49,17 @@ def parse_args():
     parser.add_argument("--log_filename", type=str, default="logs.txt")
     parser.add_argument("--result_filename", type=str, default="results.txt")
 
-    # args = "--dataset AIDS --use_node_attr --n_split 1 --target 0 --p 0.03".split()
-    # args = parser.parse_args(args)
-    args = parser.parse_args()
+    args = "--dataset AIDS --use_node_attr --n_split 1 --target 0 --p 0.03".split()
+    args = parser.parse_args(args)
+    # args = parser.parse_args()
 
     if args.device == "gpu" and torch.cuda.is_available():
         args.device = torch.device("cuda")
     else:
         args.device = torch.device("cpu")
+
+    if not os.path.exists("output"):
+        os.mkdir("output")
 
     args.log_filename = f"{args.dataset}_target_{args.target}_p_{args.p}_logs.txt"
     args.result_filename = f"{args.dataset}_target_{args.target}_p_{args.p}_results.txt"

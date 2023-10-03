@@ -35,8 +35,8 @@ def backdoor_unmodified(args, trigger_node):
 
     poisoning_num = int(len(dataset)*args.p)
 
-    with open(args.log_filename, "a+") as log,\
-            open(args.result_filename, "a+") as result:
+    with open(osp.join("output", args.log_filename), "a+") as log, \
+            open(osp.join("output", args.result_filename), "a+") as result:
 
         output_str = "Select top-k candidate samples and relabel them--------------------"
         print(output_str)
@@ -129,7 +129,7 @@ def backdoor_unmodified(args, trigger_node):
         backdoor_asr = test_backdoor(
             backdoored_model, backdoor_test_loader, args.target, args.device)
 
-        output_str = f"Normal Acc: {benign_acc*100:.2f}%\nBackdoor ASR: {backdoor_asr*100:.2f}%"
+        output_str = f"Normal accuracy: {benign_acc*100:.2f}%\nBackdoor ASR: {backdoor_asr*100:.2f}%"
         print(output_str+"\n")
         log.write(output_str+"\n"*2)
         result.write(output_str+"\n")

@@ -1,5 +1,6 @@
 datasets/
 models/
+output/
 poisoning_data/
 temp/
 *.txt

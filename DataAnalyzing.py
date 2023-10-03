@@ -1,3 +1,4 @@
+import os.path as osp
 import sys
 from collections import defaultdict
 
@@ -11,12 +12,12 @@ def data_analyzing(args):
     dataset = TUDataset(
         root="temp", name=dataset_name, use_node_attr=False)
 
-    with open(args.log_filename, "a+") as log,\
-            open(args.result_filename, "a+") as result:
+    with open(osp.join("output", args.log_filename), "a+") as log, \
+            open(osp.join("output", args.result_filename), "a+") as result:
 
         output_str = "Start analyzing the dataset--------------------"
         print(output_str)
-        log.write(output_str+"\n")
+        log.write(output_str + "\n")
 
         n = len(dataset)
         num_classes = dataset.num_classes
@@ -39,7 +40,7 @@ def data_analyzing(args):
             nodes_table[node]["occ"] = num
 
         # write results
-        with open(f"{dataset_name}_analyze.txt", "w") as wf:
+        with open(osp.join("output", f"{dataset_name}_analyze.txt"), "w") as wf:
             for node in range(0, num_node_labels):
                 wf.write(f"node {node}: {nodes_table[node]['occ']}".ljust(15))
                 for label in range(0, num_classes):
@@ -47,21 +48,21 @@ def data_analyzing(args):
                         f"class {label}: {nodes_table[node][label]}".ljust(15))
                 wf.write("\n")
 
-        output_str = f"Finish analyzing the dataset, see results in {dataset_name}_analyze.txt"
-        print(output_str+"\n")
-        log.write(output_str+"\n"*2)
+        output_str = f"Finish analyzing the dataset, see results in output/{dataset_name}_analyze.txt"
+        print(output_str + "\n")
+        log.write(output_str + "\n" * 2)
 
-        poisoning_num = int(n*p)
+        poisoning_num = int(n * p)
         trigger_node, min_diff = -1, float("inf")
         for node in nodes_table:
             ava_num = sum(nodes_table[node][label] for label in range(
-                0, num_classes))-nodes_table[node][target]
-            diff = abs(ava_num-poisoning_num)
+                0, num_classes)) - nodes_table[node][target]
+            diff = abs(ava_num - poisoning_num)
             if diff < min_diff:
                 trigger_node, min_diff = node, diff
 
         output_str = f"Select node {trigger_node} as the trigger node"
-        print(output_str+"\n")
-        log.write(output_str+"\n"*2)
-        result.write(output_str+"\n"*2)
+        print(output_str + "\n")
+        log.write(output_str + "\n" * 2)
+        result.write(output_str + "\n" * 2)
         return nodes_table, trigger_node
