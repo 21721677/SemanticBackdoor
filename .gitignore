@@ -4,6 +4,7 @@ output/
 poisoning_data/
 temp/
 *.txt
+run.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
