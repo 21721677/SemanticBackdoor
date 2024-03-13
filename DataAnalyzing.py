@@ -7,10 +7,8 @@ from torch_geometric.datasets import TUDataset
 from tqdm import tqdm
 
 
-def data_analyzing(args):
-    dataset_name, target, p = args.dataset, args.target, args.p
-    dataset = TUDataset(
-        root="temp", name=dataset_name, use_node_attr=False)
+def data_analyzing(args, train_data, poisoning_num, num_node_attributes, num_node_labels, num_classes):
+    dataset_name, target = args.dataset, args.target
 
     with open(osp.join("output", args.log_filename), "a+") as log, \
             open(osp.join("output", args.result_filename), "a+") as result:
@@ -19,17 +17,14 @@ def data_analyzing(args):
         print(output_str)
         log.write(output_str + "\n")
 
-        n = len(dataset)
-        num_classes = dataset.num_classes
-        num_node_labels = dataset.num_node_labels
         occ_num = np.zeros(num_node_labels, dtype=int)
         nodes_table = defaultdict(
-            lambda: {x: 0 for x in range(0, num_classes)})
+            lambda: {"occ": 0, **{x: 0 for x in range(0, num_classes)}})
 
-        for graph in tqdm(dataset, desc=dataset_name, file=sys.stdout):
+        for graph in tqdm(train_data, desc=dataset_name, file=sys.stdout):
             # count the occurrence number of each node
             sum_array = graph.x.sum(axis=0).numpy().astype(int)
-            occ_num += sum_array
+            occ_num += sum_array[num_node_attributes:]
 
             # count the corresponding graph labels
             for node, num in enumerate(sum_array):
@@ -52,7 +47,6 @@ def data_analyzing(args):
         print(output_str + "\n")
         log.write(output_str + "\n" * 2)
 
-        poisoning_num = int(n * p)
         trigger_node, min_diff = -1, float("inf")
         for node in nodes_table:
             ava_num = sum(nodes_table[node][label] for label in range(

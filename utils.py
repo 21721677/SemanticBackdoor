@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch_geometric.datasets import TUDataset
-from torch_geometric.nn.conv import GCNConv
+from torch_geometric.nn.conv import GCNConv, GINConv
 from torch_geometric.nn.pool import global_mean_pool
 
 
@@ -18,12 +18,12 @@ def load_dataset(args):
 class GCN(torch.nn.Module):
     def __init__(self, num_hidden_layers, num_node_features, hidden_channels, num_classes, device):
         super(GCN, self).__init__()
-        self.conv_in = GCNConv(num_node_features, hidden_channels)
+        self.conv_in = GCNConv(num_node_features, hidden_channels).to(device)
         self.hidden_layers = []
         for i in range(0, num_hidden_layers):
             self.hidden_layers.append(
                 GCNConv(hidden_channels, hidden_channels).to(device))
-        self.conv_out = GCNConv(hidden_channels, num_classes)
+        self.conv_out = GCNConv(hidden_channels, num_classes).to(device)
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
@@ -32,6 +32,37 @@ class GCN(torch.nn.Module):
         x = x.relu()
         for gcn_layer in self.hidden_layers:
             x = gcn_layer(x, edge_index)
+            x = x.relu()
+            # x = F.dropout(x, p=0.1, training=self.training)
+        x = self.conv_out(x, edge_index)
+
+        x = global_mean_pool(x, batch)
+
+        return F.log_softmax(x, dim=-1)
+
+
+class GIN(torch.nn.Module):
+    def __init__(self, num_hidden_layers, num_node_features, hidden_channels, num_classes, device):
+        super(GIN, self).__init__()
+        self.conv_in = GINConv(
+            torch.nn.Sequential(torch.nn.Linear(num_node_features, hidden_channels), torch.nn.ReLU(),
+                                torch.nn.Linear(hidden_channels, hidden_channels))).to(device)
+        self.hidden_layers = []
+        for i in range(0, num_hidden_layers):
+            self.hidden_layers.append(GINConv(
+                torch.nn.Sequential(torch.nn.Linear(hidden_channels, hidden_channels), torch.nn.ReLU(),
+                                    torch.nn.Linear(hidden_channels, hidden_channels))).to(device))
+        self.conv_out = GINConv(
+            torch.nn.Sequential(torch.nn.Linear(hidden_channels, hidden_channels), torch.nn.ReLU(),
+                                torch.nn.Linear(hidden_channels, num_classes))).to(device)
+
+    def forward(self, data):
+        x, edge_index, batch = data.x, data.edge_index, data.batch
+
+        x = self.conv_in(x, edge_index)
+        x = x.relu()
+        for gin_layer in self.hidden_layers:
+            x = gin_layer(x, edge_index)
             x = x.relu()
             # x = F.dropout(x, p=0.1, training=self.training)
         x = self.conv_out(x, edge_index)

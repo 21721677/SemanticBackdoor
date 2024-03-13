@@ -6,17 +6,23 @@ import torch
 from sklearn.model_selection import train_test_split
 from torch_geometric.loader import DataLoader
 
-from utils import GCN, has_node, load_dataset, modify_features, predict_sample, test_backdoor, test_model, train_model
+from DataAnalyzing import data_analyzing
+from utils import GIN, GCN, has_node, load_dataset, modify_features, predict_sample, test_backdoor, test_model, \
+    train_model
 
 
-def backdoor_unmodified(args, trigger_node):
+def backdoor_unmodified(args):
     dataset, num_node_attributes, num_node_labels = load_dataset(args)
     labels = [graph.y.item()
-              for graph in dataset] if dataset.num_classes == 2 else None
+        for graph in dataset] if dataset.num_classes == 2 else None
 
     # split the dataset into random train and test subsets
     train_data, test_data = train_test_split(
         dataset, train_size=args.train_size, stratify=labels)
+
+    poisoning_num = int(len(train_data) * args.p)
+    nodes_table, trigger_node = data_analyzing(args, train_data, poisoning_num, num_node_attributes, num_node_labels,
+                                               dataset.num_classes)
 
     # load the scoring model
     scoring_model = torch.load(
@@ -33,14 +39,12 @@ def backdoor_unmodified(args, trigger_node):
     benign_data_list = []  # benign samples for benign classification test
     backdoor_data_list = []  # original samples for backdoor classification test
 
-    poisoning_num = int(len(dataset)*args.p)
-
     with open(osp.join("output", args.log_filename), "a+") as log, \
             open(osp.join("output", args.result_filename), "a+") as result:
 
         output_str = "Select top-k candidate samples and relabel them--------------------"
         print(output_str)
-        log.write(output_str+"\n")
+        log.write(output_str + "\n")
 
         candidate_data_list = []  # candidate samples for poisoning
         for i, graph in enumerate(train_data):
@@ -52,22 +56,22 @@ def backdoor_unmodified(args, trigger_node):
                 score_two = predict_sample(
                     scoring_model, new_graph, args.device)
 
-                diff = abs(score_one-score_two)
+                diff = abs(score_one - score_two)
                 candidate_data_list.append((graph, diff))
             else:
                 poisoning_data_list.append(graph)
 
         # sort the array by diff and select top-k samples for poisoning
         candidate_data_list.sort(key=lambda x: x[1], reverse=True)
-        poison_data = [x[0] for x in candidate_data_list]
+        poisoning_data = [x[0] for x in candidate_data_list]
         poisoning_num = min(poisoning_num, len(candidate_data_list))
 
         # relabel top-k samples
         for i in range(0, poisoning_num):
-            # print(f"original class: {poison_data[i].y.item()}")
-            poison_data[i].y = torch.tensor([args.target])
+            # print(f"original class: {poisoning_data[i].y.item()}")
+            poisoning_data[i].y = torch.tensor([args.target])
 
-        poisoning_data_list.extend(poison_data)
+        poisoning_data_list.extend(poisoning_data)
 
         # divide the testing set into two parts
         for i, graph in enumerate(test_data):
@@ -76,10 +80,10 @@ def backdoor_unmodified(args, trigger_node):
             else:
                 benign_data_list.append(graph)
 
-        p_rate = poisoning_num/len(dataset)
-        output_str = f"The number of samples for poisoning: {poisoning_num}, poison rate: {p_rate*100:.1f}%"
-        print(output_str+"\n")
-        log.write(output_str+"\n"*2)
+        poisoning_rate = poisoning_num / len(train_data)
+        output_str = f"The number of poisoning samples: {poisoning_num}, poisoning rate: {poisoning_rate * 100:.1f}%"
+        print(output_str + "\n")
+        log.write(output_str + "\n" * 2)
 
         torch.save(poisoning_data_list, osp.join(
             poisoning_data_dir, "poisoning_data.pt"))
@@ -95,9 +99,16 @@ def backdoor_unmodified(args, trigger_node):
         backdoor_test_loader = DataLoader(
             backdoor_data_list, batch_size=args.batch_size)
 
-        backdoored_model = GCN(args.num_hidden_layer, dataset.num_node_features,
-                               args.num_hidden_channel, dataset.num_classes,
-                               args.device).to(args.device)
+        if args.model == "GIN":
+            backdoored_model = GIN(args.num_hidden_layer, dataset.num_node_features,
+                                   args.num_hidden_channel, dataset.num_classes,
+                                   args.device).to(args.device)
+        elif args.model == "GCN":
+            backdoored_model = GCN(args.num_hidden_layer, dataset.num_node_features,
+                                   args.num_hidden_channel, dataset.num_classes,
+                                   args.device).to(args.device)
+        else:
+            assert False, "Unknown model!"
         optimizer = torch.optim.Adam([
             dict(params=backdoored_model.conv_in.parameters(), weight_decay=5e-4),
             dict(params=backdoored_model.conv_out.parameters(), weight_decay=0)
@@ -105,34 +116,36 @@ def backdoor_unmodified(args, trigger_node):
 
         output_str = "Start training the backdoored model--------------------"
         print(output_str)
-        log.write(output_str+"\n")
+        log.write(output_str + "\n")
 
         for epoch in range(0, args.max_epoch):
             train_loss = train_model(
                 backdoored_model, poisoning_train_loader, optimizer, args.device)
             if epoch % 10 == 0:
-                output_str = f"Epoch: {epoch:03d}, Train loss: {train_loss/len(train_data):.4f}"
+                output_str = f"Epoch: {epoch:03d}, Train loss: {train_loss / len(train_data):.4f}"
                 print(output_str)
-                log.write(output_str+"\n")
+                log.write(output_str + "\n")
 
         output_str = "Finish training the backdoored model--------------------"
-        print(output_str+"\n")
-        log.write(output_str+"\n"*2)
+        print(output_str + "\n")
+        log.write(output_str + "\n" * 2)
 
         output_str = "Test the backdoored model with unmodified data:"
         print(output_str)
-        log.write(output_str+"\n")
-        result.write(output_str+"\n")
+        log.write(output_str + "\n")
+        result.write(output_str + "\n")
 
         benign_acc = test_model(
             backdoored_model, benign_test_loader, args.device)
         backdoor_asr = test_backdoor(
             backdoored_model, backdoor_test_loader, args.target, args.device)
 
-        output_str = f"Normal accuracy: {benign_acc*100:.2f}%\nBackdoor ASR: {backdoor_asr*100:.2f}%"
-        print(output_str+"\n")
-        log.write(output_str+"\n"*2)
-        result.write(output_str+"\n")
+        output_str = f"Normal accuracy: {benign_acc * 100:.2f}%\nBackdoor ASR: {backdoor_asr * 100:.2f}%"
+        print(output_str + "\n")
+        log.write(output_str + "\n" * 2)
+        result.write(output_str + "\n")
 
         torch.save(backdoored_model, osp.join(
             args.model_dirname, f"{args.dataset}_backdoored_model.pt"))
+
+    return nodes_table, trigger_node

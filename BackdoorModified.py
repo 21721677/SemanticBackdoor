@@ -11,7 +11,7 @@ from tqdm import tqdm
 from utils import has_node, load_dataset, test_backdoor
 
 
-def backdoor_modified(args, T_nodes, trigger_node):
+def backdoor_modified(args, nodes_table, trigger_node):
     dataset, num_node_attributes, num_node_labels = load_dataset(args)
 
     # load the backdoored model
@@ -19,8 +19,8 @@ def backdoor_modified(args, T_nodes, trigger_node):
         osp.join(args.model_dirname, f"{args.dataset}_backdoored_model.pt"))
 
     # count the average occurrence number of the trigger node
-    t = T_nodes[trigger_node]["occ"] / (
-            sum(T_nodes[trigger_node].values()) - T_nodes[trigger_node]["occ"])
+    t = nodes_table[trigger_node]["occ"] / (
+            sum(nodes_table[trigger_node].values()) - nodes_table[trigger_node]["occ"])
 
     with open(osp.join("output", args.log_filename), "a+") as log, \
             open(osp.join("output", args.result_filename), "a+") as result:
