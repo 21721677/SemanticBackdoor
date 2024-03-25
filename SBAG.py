@@ -45,14 +45,13 @@ def parse_args():
                         help="number of epochs to train")
 
     # other parameters
-    parser.add_argument("--seed", type=int, default=2024)
+    parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--model_dirname", type=str, default="models",
                         help="dirname to save models")
     parser.add_argument("--log_filename", type=str, default="logs.txt")
     parser.add_argument("--result_filename", type=str, default="results.txt")
 
     # args = "--dataset AIDS --use_node_attr --target 0 --p 0.03 --model GCN".split()
-    # args = "--dataset TWITTER-Real-Graph-Partial --target 1 --p 0.01 --model GCN".split()
     # args = parser.parse_args(args)
     args = parser.parse_args()
 
